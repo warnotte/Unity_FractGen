@@ -36,7 +36,8 @@ public class FractGen : MonoBehaviour
     public int scale_seed = 12345;
     private int old_scale_seed = 12345;
 
-    private bool drag;
+    private bool dragRot;
+    private bool dragMove;
 
     [Range(0.001f, 0.02f)]
     public float min_scale_to_create = 0.01f;
@@ -123,9 +124,11 @@ public class FractGen : MonoBehaviour
         
         Camera.main.orthographicSize = 2.0f;
         NewMethod();
+        oldPos = Input.mousePosition;
     }
 
     private int idx = 0;
+    private Vector3 oldPos;
 
     private void NewMethod()
     {
@@ -290,31 +293,38 @@ public class FractGen : MonoBehaviour
 
         if (Input.GetAxis("Mouse ScrollWheel") > 0) // forward
         {
-            sphere.transform.localPosition.Set(sphere.transform.localPosition.x, sphere.transform.localPosition.y, sphere.transform.localPosition.z + 0.1f);
+            sphere.transform.Translate(new Vector3(0, 0, 1), Space.World);
          }
         if (Input.GetAxis("Mouse ScrollWheel") < 0) // back
         {
-            sphere.transform.position.Set(sphere.transform.localPosition.x, sphere.transform.localPosition.y, sphere.transform.localPosition.z - 0.1f);
+            sphere.transform.Translate(new Vector3(0, 0, -1), Space.World);
         }
-       // Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize, 0.1f, 2.5f);
+        // Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize, 0.1f, 2.5f);
 
         if (Input.GetMouseButtonDown(0))
         {
-            drag = true;
-            
-            // Debug.Log("Event : " + EventSystem.current);
-            //Debug.Log("CLK   : " + EventSystem.current.IsPointerOverGameObject());
-            //if (EventSystem.current != null)
-
-            if (EventSystem.current.IsPointerOverGameObject())
-                drag = false;
-
+            dragRot = true;
         }
         if (Input.GetMouseButtonUp(0))
-            drag = false;
+            dragRot = false;
 
-        if (drag == true)
+        if (dragRot == true)
             Rotate();
+
+        if (Input.GetMouseButtonDown(1))
+        {
+            dragMove = true;
+        }
+        if (Input.GetMouseButtonUp(1))
+            dragMove = false;
+
+
+        if (dragMove)
+        {
+            Vector3 delta = oldPos - Input.mousePosition;
+            oldPos = Input.mousePosition;
+            sphere.transform.Translate(new Vector3(-delta.x/250, -delta.y/250, 0), Space.World);
+        }
 
         if (Input.GetKeyDown(KeyCode.F1))
         {
